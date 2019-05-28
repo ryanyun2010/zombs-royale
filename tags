@@ -4,3 +4,67 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
+Bush	script.js	/^function Bush(options) {$/;"	c
+Bush.draw	script.js	/^	this.draw = function() {$/;"	m
+Bush.move	script.js	/^	this.move = function () {$/;"	m
+Character	script.js	/^function Character(player, socket) {$/;"	c
+Character.Character.draw.rotateCircle	script.js	/^		function rotateCircle(px, py, radius) {$/;"	f
+Character.direction.theta	script.js	/^	this.direction = { x: 0, y: 0, theta: 0 }$/;"	p
+Character.direction.x	script.js	/^	this.direction = { x: 0, y: 0, theta: 0 }$/;"	p
+Character.direction.y	script.js	/^	this.direction = { x: 0, y: 0, theta: 0 }$/;"	p
+Character.draw	script.js	/^	this.draw = function() {$/;"	m
+Character.move	script.js	/^	this.move = function () {$/;"	m
+Character.rotate	script.js	/^	this.rotate = function(mouseX,mouseY) {$/;"	m
+Character.velocity.x	script.js	/^		x:0, y: 0$/;"	p
+Character.velocity.y	script.js	/^		x:0, y: 0$/;"	p
+Crate	script.js	/^function Crate(options) {$/;"	c
+Crate.draw	script.js	/^	this.draw = function() {$/;"	m
+Crate.move	script.js	/^	this.move = function () {$/;"	m
+Projectile	script.js	/^function Projectile() {$/;"	c
+Projectile.draw	script.js	/^	this.draw = function(x,y) {$/;"	m
+Projectile.move	script.js	/^	this.move = function() {$/;"	m
+Weapon	script.js	/^function Weapon(options) {$/;"	c
+Weapon.draw	script.js	/^	this.draw = function(cx, cy, cr, angle) {$/;"	m
+Weapon.fire	script.js	/^	this.fire = function() {$/;"	m
+Weapon.load	script.js	/^	this.load = function() {$/;"	m
+Weapon.throw	script.js	/^	this.throw = function() {$/;"	m
+Weapon.velocity.x	script.js	/^		x: 0, y: 0$/;"	p
+Weapon.velocity.y	script.js	/^		x: 0, y: 0$/;"	p
+addEventListeners	script.js	/^function addEventListeners() {$/;"	f
+addSocketEvents	script.js	/^function addSocketEvents() {$/;"	f
+animate	script.js	/^function animate() {$/;"	f
+announce	script.js	/^function announce() {$/;"	f
+canvas	script.js	/^var canvas = document.querySelector('canvas');$/;"	v
+changeDirection	script.js	/^function changeDirection(key) {$/;"	f
+characterName	script.js	/^var characterName = prompt("WHAT's YOUR NAME?");$/;"	v
+collides	script.js	/^function collides(thing1, thing2) {$/;"	f
+coolDownPeriod	script.js	/^var coolDownPeriod = 5;$/;"	v
+countdownDiv	script.js	/^var countdownDiv = document.querySelector('#countdown');$/;"	v
+countdownTimer	script.js	/^var countdownTimer = 5;$/;"	v
+draw	script.js	/^    this.draw = function() {$/;"	f
+emitGameStarted	script.js	/^function emitGameStarted() {$/;"	f
+gameStarted	script.js	/^var gameStarted = false;$/;"	v
+gameWorld	script.js	/^var gameWorld, me, bushes, crates, resources;$/;"	v
+generateWorld	script.js	/^function generateWorld(socketId, data) {$/;"	f
+getGameState	script.js	/^function getGameState() {$/;"	f
+getState	script.js	/^function getState() {$/;"	f
+getWorldState	script.js	/^function getWorldState() {$/;"	f
+images.tile	script.js	/^	tile: { url: '\/\/mrlera.wisen.space\/capture\/load\/6DiIVWK1O4tUbo6TTYgAvFFI.png', image: new Image() },$/;"	p
+initializeSockets	script.js	/^function initializeSockets() {$/;"	f
+isCoolDown	script.js	/^var isCoolDown = false;$/;"	v
+isLeader	script.js	/^var isLeader = false;$/;"	v
+it	script.js	/^var it;$/;"	v
+loadResources	script.js	/^function loadResources() {$/;"	f
+maxPlayers	script.js	/^var maxPlayers = 2;$/;"	v
+move	script.js	/^    this.move = function() {$/;"	c
+moveCharacter	script.js	/^function moveCharacter(e) {$/;"	f
+resizeCanvas	script.js	/^function resizeCanvas() {$/;"	f
+rotate	script.js	/^function rotate(e) {$/;"	f
+socket	script.js	/^var socket;$/;"	v
+startCoolDown	script.js	/^function startCoolDown() {$/;"	f
+stopCharacter	script.js	/^function stopCharacter(e) {$/;"	f
+this.calculateScreenCoordinates	script.js	/^    this.calculateScreenCoordinates = function(obj) {$/;"	m
+throwWeapon	script.js	/^function throwWeapon() {$/;"	f
+time	script.js	/^var time;$/;"	v
+tools	script.js	/^var tools = canvas.getContext('2d');$/;"	v
+update	script.js	/^	this.update = function(player) {$/;"	f

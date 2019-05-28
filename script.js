@@ -1,6 +1,4 @@
-/*
-    TODOS:
-    DONE 1. Create our character as a simple circle
+/* 1. Create our character as a simple circle
     2. Make a start button
     3. Make a line for a stick gun
     4. Make a leader board
@@ -35,9 +33,17 @@ var images = {
 	bush: { url: '//mrlera.wisen.space/capture/load/kjFJM9XwclT7aYeLa_ka2p8R.png', image: new Image() },
 	crate: { url: '//mrlera.wisen.space/capture/load/o8uns8p8uet7wxb8nqiuynvt.png', image: new Image() }
 }
+var maxPlayers = 2;
+var countdownTimer = 5;
+var coolDownPeriod = 5;
+var isCoolDown = false;
+var it;
+var gameStarted = false;
+var countdownDiv = document.querySelector('#countdown');
 
 var isLeader = false;
 var socket;
+var time;
 
 var gameWorld, me, bushes, crates, resources;
 var characterName = prompt("WHAT's YOUR NAME?");
@@ -46,8 +52,8 @@ if(characterName.length > 10) location.href = 'https://www.wisen.space'
 /* ADD FUNCTIONS HERE */
 function World() {
 
-    this.width = 3;
-    this.height = 3;
+    this.width = 15;
+    this.height = 15;
 
     this.x = Math.random()*(this.width-0.5) + 0.25;
     this.y = Math.random()*(this.height-0.5) + 0.25;
@@ -81,6 +87,7 @@ function World() {
     }
 
     this.draw = function() {
+
     	// WORLD MUST ALWAYS BE DRAWN IN A WAY THAT THE MAIN CHARACTER IS IN THE MIDDLE OF THE SCREEN
         // DRAWING SCREEN
     	tileHeight = tileWidth*canvas.width/canvas.height;
@@ -252,13 +259,17 @@ function Character(player, socket) {
 	player = player || {};
 	var wand = new Weapon({width: 1, height:100, color: 'cyan'});
 	var lollipop = new Weapon({width:50, height:100, image: 'lollipop'});
+	var notItColor = '#white';
+	var itColor = 'red';
 
 	this.speed = 0.01;
 	this.bodyRadius = 0.03;
 	this.handRadius = 0.013;
 	this.width = (this.bodyRadius + this.handRadius)*1.75;
 	this.height = (this.bodyRadius + this.handRadius)*1.75;
-	this.color = '#f7bd69';
+	this.color = notItColor;
+	this.handColor = black;
+
 	this.outlineColor = 'black';
 	this.angle = Math.PI / 5;
 	this.direction = { x: 0, y: 0, theta: 0 }
@@ -269,7 +280,7 @@ function Character(player, socket) {
 	this.velocity = {
 		x:0, y: 0
 	}
-	this.socket = socket;
+	this.socket = player.socket || socket;
 	this.name = player.name;
 
 	this.move = function () {
@@ -286,8 +297,26 @@ function Character(player, socket) {
 
 		var c = this;
 		crates.forEach(function(crate) {
-			collides(c, crate);
-		})
+
+			if(collides(c, crate)){
+				console.log("COLLIDE BUSH")
+			}
+		});
+
+		if(it ===  c.id) {
+			var nowItPlayer = resources.find(function(resource) {
+				if(isCoolDown) return false;
+				if(!(resource instanceof Character)) return false;
+				if(resource.id === it ) return false;
+				return collides(c, resource );
+			});
+			if(nowItPlayer) {
+				console.log('NOW IT PLAYER', it)
+				it = nowItPlayer.id;
+				startCoolDown();
+			}
+		}
+
 
 	}
 
@@ -310,6 +339,8 @@ function Character(player, socket) {
 		var ct = Math.cos(this.direction.theta);
 		var st = Math.sin(this.direction.theta);
 
+		this.color = this.id === it ? itColor : notItColor;
+
 		function rotateCircle(px, py, radius) {
 			var rx = px*ct - py*st;
 			var ry = px*st + py*ct;
@@ -323,7 +354,7 @@ function Character(player, socket) {
 		tools.beginPath();
 		tools.lineWidth=2;
 		tools.strokeStyle = this.outlineColor;
-		tools.fillStyle = this.color;
+		tools.fillStyle = this.handColor;
 		var leftHand = rotateCircle(-d, -b, this.handRadius);
 		tools.fill();
 		tools.stroke();
@@ -340,7 +371,7 @@ function Character(player, socket) {
 		tools.beginPath();
 		tools.lineWidth=2;
 		tools.strokeStyle = this.outlineColor;
-		tools.fillStyle = this.color;
+		tools.fillStyle = this.handColor;
 		tools.arc(s.x,s.y, r, 0,Math.PI*2);
 		tools.fill();
 		tools.stroke();
@@ -361,6 +392,13 @@ function Character(player, socket) {
 
 }
 
+function startCoolDown() {
+	isCoolDown = true;
+	setTimeout(function() {
+		isCoolDown = false;
+	}, coolDownPeriod*1000);
+}
+
 function getGameState() {
 	return {
 		id: me.id
@@ -375,6 +413,7 @@ function animate() {
 
     resources.forEach(function(resource) {
     	if(resource instanceof Weapon) return;
+
         resource.move();
         resource.draw();
     });
@@ -396,9 +435,10 @@ function addSocketEvents() {
 	//generateWorld();
 	socket.on('newleader', () => {
 		console.log('newleader');
+
 		isLeader = true;
 		if(!resources) {
-			generateWorld();
+			generateWorld(socket.id);
 		}
 
 	})
@@ -410,13 +450,27 @@ function addSocketEvents() {
 		}
 	});
 
+	socket.on('announceresponse', (data) => {
+		countdownDiv.innerHTML = data.data.time;
+	})
+
+	socket.on('gamestartedresponse', (data) => {
+		console.log('GAMESTARTED RESPONSE', data.data);
+
+		it = data.data.it;
+		console.log('GAME STARTED RESPONSE IT', it);
+		startCoolDown();
+		gameStarted = true;
+	})
+
 	socket.on('updateworldresponse', (data) => {
-		console.log('updateworldresponse', data);
 		if(!resources) {
 			console.log('generating world')
-			generateWorld(data.data);
+			generateWorld(socket.id, data.data);
 		}
 	})
+
+
 
 	socket.on('userdisconnected', (socketId) => {
 		console.log('userdisconnected', socketId);
@@ -424,18 +478,22 @@ function addSocketEvents() {
 	});
 
 	socket.on('updatestateresponse', (data) => {
-		console.log('updatestateresponse', data);
 		var player = data.data;
 		var socketId = data.socket;
+
 		var character = (resources || []).find(resource => resource.id === player.id);
 		if(character) {
 			character.update(player);
 		} else {
-			var character = new Character(player, socketId);
+			character = new Character(player, socketId);
 			(resources || []).splice(1, 0, character);
 			(resources || []).splice(2, 0, character.weapon);
 		}
 	});
+
+	socket.on('tagresponse', (data) => {
+		alert(data)
+	})
 
 }
 
@@ -444,7 +502,7 @@ function initializeSockets() {
 	restfull.post({
 		path: '/tunnel/register'
 		,data : {
-			events: ['updatestate', 'updateworld']
+			events: ['updatestate', 'updateworld', 'gamestarted', 'announce']
 		}
 	}, (err, resp) => {
 		if(err || resp.error) {
@@ -545,8 +603,36 @@ function getState() {
 	return me;
 }
 
+function emitGameStarted() {
+
+	gameStarted = true;
+	players = resources.filter(resource => resource instanceof Character);
+	console.log('STARTING GAME', players);
+	var playerNumber = parseInt(Math.random()*players.length);
+	it = players[playerNumber].id;
+	console.log('STARTING GAME IT', it);
+	startCoolDown();
+	socket.emit('gamestarted', {it: it});
+}
+
+
+function announce() {
+	time--;
+	if(time === 0) {
+		emitGameStarted();
+	} else {
+		setTimeout(announce, 1000);
+	}
+	countdownDiv.innerHTML = time;
+	socket.emit('announce', {time: time});
+}
+
 function getWorldState() {
 	var players = resources.filter(resource => resource instanceof Character);
+	if(players.length === maxPlayers-1) {
+		time = countdownTimer;
+		setTimeout(announce, 1000);
+	}
 	return {
 		bushes: bushes,
 		players: players,
@@ -554,9 +640,9 @@ function getWorldState() {
 	}
 }
 
-function generateWorld(data) {
+function generateWorld(socketId, data) {
 	gameWorld = new World();
-	me = new Character({x: gameWorld.x, y: gameWorld.y });
+	me = new Character({x: gameWorld.x, y: gameWorld.y }, socketId);
 	me.name = characterName;
 
 	resources = [gameWorld, me, me.weapon]
@@ -570,14 +656,14 @@ function generateWorld(data) {
 	}
 
 	bushes = [];
-	while(bushes.length < 100) {
+	while(bushes.length < 500) {
 		var bushData = data ? data.bushes[bushes.length] : undefined;
 	    bushes.push(new Bush(bushData));
 	}
 
 
 	crates = [];
-	while(crates.length < 100) {
+	while(crates.length < 500) {
 		var crateData = data ? data.crates[crates.length] : undefined;
 	    crates.push(new Crate(crateData));
 	}
@@ -603,8 +689,6 @@ function collides(thing1, thing2) {
 	if((thing2.x + thing2.width) < thing1.x) {
 		return false;
 	}
-
-	console.log('COLLIDES');
 	return true;
 }
 
